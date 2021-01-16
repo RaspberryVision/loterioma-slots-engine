@@ -103,7 +103,6 @@ class Round
         return [
             'result' => $this->result->getMatrix(),
             'status' => $this->status,
-            'matched' => $this->getResult()->printMatched()
         ];
     }
 }

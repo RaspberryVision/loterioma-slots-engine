@@ -26,7 +26,6 @@ class ResultState
     public function __construct(?array $matrix = [])
     {
         $this->matrix = $matrix;
-        $this->wonBets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -44,18 +43,6 @@ class ResultState
         $this->matrix = $matrix;
 
         return $this;
-    }
-
-    public function printMatched()
-    {
-        $results = [];
-        foreach ($this->getWonBets() as $item) {
-            $results[] = [
-                'rate' => $item->getRate(),
-                'number' => $item->getNumber()
-            ];
-        }
-        return $results;
     }
 
     /**
