@@ -1,0 +1,34 @@
+version: '3.5'
+services:
+    loterioma_slots_engine:
+        build: .docker/php
+        container_name: loterioma_slots_engine
+        stdin_open: true
+        tty: true
+        ports:
+          - 10002:80
+        environment:
+          - APACHE_DOCUMENT_ROOT=/var/www/html/public
+        volumes:
+          - .:/var/www/html
+        networks:
+          - my-proxy-net
+
+    loterioma_slots_engine_db:
+      image: mysql:5.7
+      logging:
+        driver: "none"
+      command: --default-authentication-plugin=mysql_native_password --sql_mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION"
+      restart: on-failure
+      environment:
+        MYSQL_DATABASE: loterioma
+        MYSQL_USER: loterioma
+        MYSQL_PASSWORD: loterioma
+        MYSQL_ROOT_PASSWORD: loterioma
+      networks:
+        - my-proxy-net
+
+networks:
+    my-proxy-net:
+        external: true
+        name: loterioma-net
