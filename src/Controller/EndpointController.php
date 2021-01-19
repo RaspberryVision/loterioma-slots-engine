@@ -56,7 +56,7 @@ class EndpointController extends AbstractController
 
         $gameRound = $engine->play($gameObject, json_decode($request->getContent(), true));
 
-      //  $this->checkWinnings($gameRound);
+         $this->checkWinnings($gameRound);
 
         return $this->json(
             [
@@ -68,13 +68,25 @@ class EndpointController extends AbstractController
     public function checkWinnings(Round $round)
     {
         // Default round is lost.
-        $round->setStatus(1 );
+        $round->setStatus(1);
 
-        /** @var Bet $bet */
-        foreach ($round->getBets() as $bet) {
-            if ($this->checkBet($round->getResult(), $bet)) {
-                $round->getResult()->addWonBet($bet);
-                $round->setStatus(2);
+        $matrix = $round->getResult()->getMatrix();
+
+        foreach ($round->getGame()->getCombinations() as $combination) {
+
+            $symbol = $matrix[$combination->getFields()[0][0]][$combination->getFields()[0][1]];
+            foreach ($combination->getFields() as $key => $field) {
+
+                if ($symbol == $matrix[$field[0]][$field[1]]) {
+
+                } else {
+                    continue;
+                }
+
+
+                if ($key == count($combination->getFields()) - 1) {
+                    $round->setStatus(2);
+                }
             }
         }
 
