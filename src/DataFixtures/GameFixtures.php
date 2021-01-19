@@ -140,12 +140,65 @@ class GameFixtures extends Fixture
                 'generator' => [
                     'seed' => 1,
                     'min' => 1,
-                    'max' => 15,
+                    'max' => 4,
                     'format' => [
                         [1, 1, 1],
                         [1, 1, 1],
                         [1, 1, 1],
                     ],
+                ],
+                'symbols' => [
+                    [
+                        'name' => 'As',
+                        'rate' => 100,
+                        'image' => 'A',
+                    ],
+                    [
+                        'name' => 'Krol',
+                        'rate' => 50,
+                        'image' => 'K',
+                    ],
+                    [
+                        'name' => 'Dama',
+                        'rate' => 25,
+                        'image' => 'D',
+                    ],
+                    [
+                        'name' => 'Joker',
+                        'rate' => 10,
+                        'image' => 'J',
+                    ],
+                    [
+                        'name' => 'Mars',
+                        'rate' => 5,
+                        'image' => 'M',
+                    ],
+                ],
+                'combinations' => [
+                    [
+                        'name' => 'Line1',
+                        'fields' => [
+                            [0, 0],
+                            [0, 1],
+                            [0, 2],
+                        ]
+                    ],
+                    [
+                        'name' => 'Line2',
+                        'fields' => [
+                            [1, 0],
+                            [1, 1],
+                            [1, 2],
+                        ]
+                    ],
+                    [
+                        'name' => 'Line3',
+                        'fields' => [
+                            [0, 0],
+                            [1, 0],
+                            [2, 0],
+                        ]
+                    ]
                 ],
             ],
             [
