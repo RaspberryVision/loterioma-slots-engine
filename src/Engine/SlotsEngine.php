@@ -20,4 +20,14 @@ class SlotsEngine
 
         return $gameRound;
     }
+
+    public function checkWins(Round $round)
+    {
+        foreach ($round->getResult()->getMatrix() as $row) {
+
+            foreach ($row as $field) {
+
+            }
+        }
+    }
 }
