@@ -74,33 +74,21 @@ class EndpointController extends AbstractController
 
         foreach ($round->getGame()->getCombinations() as $combination) {
 
+            $validSymbols = 1;
             $symbol = $matrix[$combination->getFields()[0][0]][$combination->getFields()[0][1]];
             foreach ($combination->getFields() as $key => $field) {
 
                 if ($symbol == $matrix[$field[0]][$field[1]]) {
-
-                } else {
-                    continue;
+                    $validSymbols++;
                 }
+            }
 
-
-                if ($key == count($combination->getFields()) - 1) {
-                    $round->setStatus(2);
-                }
+            if ($validSymbols == count($combination->getFields())) {
+                $round->setStatus(2);
+                $round->getResult()->addWonCombination($combination);
             }
         }
 
         return $round;
     }
-
-    /**
-     * @param ResultState $matrix
-     * @param Bet $bet
-     * @return bool
-     */
-    private function checkBet(ResultState $resultState, Bet $bet): bool
-    {
-        return $bet->getNumber() === $resultState->getValue(0, 0);
-    }
-
 }
