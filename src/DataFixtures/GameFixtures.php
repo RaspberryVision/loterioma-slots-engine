@@ -194,9 +194,25 @@ class GameFixtures extends Fixture
                     [
                         'name' => 'Line3',
                         'fields' => [
-                            [0, 0],
-                            [1, 0],
                             [2, 0],
+                            [2, 1],
+                            [2, 2],
+                        ]
+                    ],
+                    [
+                        'name' => 'Line4',
+                        'fields' => [
+                            [0, 0],
+                            [1, 1],
+                            [2, 2],
+                        ]
+                    ],
+                    [
+                        'name' => 'Line5',
+                        'fields' => [
+                            [2, 0],
+                            [1, 1],
+                            [0, 2],
                         ]
                     ]
                 ],
