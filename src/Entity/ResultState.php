@@ -86,4 +86,16 @@ class ResultState
 
         return $this;
     }
+
+    public function printCombinations()
+    {
+        return $this->wonCombinations->map(
+            function (SlotsCombination $combination) {
+                return [
+                    'name' => $combination->getName(),
+                    'fields' => $combination->getFields(),
+                ];
+            }
+        )->toArray();
+    }
 }
