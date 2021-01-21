@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ResultStateRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -23,9 +24,15 @@ class ResultState
      */
     private $matrix = [];
 
+    /**
+     * @ORM\ManyToMany(targetEntity=SlotsCombination::class)
+     */
+    private $wonCombinations;
+
     public function __construct(?array $matrix = [])
     {
         $this->matrix = $matrix;
+        $this->wonCombinations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -54,5 +61,29 @@ class ResultState
     public function getValue(int $x, int $y): int
     {
         return $this->matrix[$x][$y] ?? -1;
+    }
+
+    /**
+     * @return Collection|SlotsCombination[]
+     */
+    public function getWonCombinations(): Collection
+    {
+        return $this->wonCombinations;
+    }
+
+    public function addWonCombination(SlotsCombination $wonCombination): self
+    {
+        if (!$this->wonCombinations->contains($wonCombination)) {
+            $this->wonCombinations[] = $wonCombination;
+        }
+
+        return $this;
+    }
+
+    public function removeWonCombination(SlotsCombination $wonCombination): self
+    {
+        $this->wonCombinations->removeElement($wonCombination);
+
+        return $this;
     }
 }
