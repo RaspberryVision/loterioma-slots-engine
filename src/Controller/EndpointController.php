@@ -74,7 +74,7 @@ class EndpointController extends AbstractController
 
         foreach ($round->getGame()->getCombinations() as $combination) {
 
-            $validSymbols = 1;
+            $validSymbols = 0;
             $symbol = $matrix[$combination->getFields()[0][0]][$combination->getFields()[0][1]];
             foreach ($combination->getFields() as $key => $field) {
 

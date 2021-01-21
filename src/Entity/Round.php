@@ -103,6 +103,7 @@ class Round
         return [
             'result' => $this->result->getMatrix(),
             'status' => $this->status,
+            'wonCombinations' => count($this->result->getWonCombinations())
         ];
     }
 }
