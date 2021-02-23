@@ -24,6 +24,7 @@ namespace App\Controller;
 use App\Engine\SlotsEngine;
 use App\Entity\Round;
 use App\Repository\GameRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -46,7 +47,7 @@ class EndpointController extends AbstractController
      * @param DiceEngine $engine
      * @return JsonResponse
      */
-    public function play(Request $request, GameRepository $gameRepository, SlotsEngine $engine): JsonResponse
+    public function play(Request $request, GameRepository $gameRepository, SlotsEngine $engine, EntityManagerInterface  $entityManager): JsonResponse
     {
         $gameObject = $gameRepository->find($request->get('id', -1));
 
@@ -57,6 +58,9 @@ class EndpointController extends AbstractController
         $gameRound = $engine->play($gameObject, json_decode($request->getContent(), true));
 
          $this->checkWinnings($gameRound);
+
+         $entityManager->persist($gameRound);
+         $entityManager->flush();
 
         return $this->json(
             [

@@ -25,7 +25,7 @@ class Round
     /**
      * @ORM\Column(type="float")
      */
-    private $balance;
+    private $balance = 0;
 
     /**
      * @ORM\OneToOne(targetEntity=ResultState::class, cascade={"persist", "remove"})
@@ -33,7 +33,7 @@ class Round
     private $result;
 
     /**
-     * @ORM\OneToOne(targetEntity=Game::class, cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity=Game::class, inversedBy="rounds")
      * @ORM\JoinColumn(nullable=false)
      */
     private $game;

@@ -53,10 +53,16 @@ class Game
      */
     private $combinations;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Round::class, mappedBy="game")
+     */
+    private $rounds;
+
     public function __construct()
     {
         $this->symbols = new ArrayCollection();
         $this->combinations = new ArrayCollection();
+        $this->rounds = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -182,6 +188,36 @@ class Game
             // set the owning side to null (unless already changed)
             if ($combination->getGame() === $this) {
                 $combination->setGame(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Round[]
+     */
+    public function getRounds(): Collection
+    {
+        return $this->rounds;
+    }
+
+    public function addRound(Round $round): self
+    {
+        if (!$this->rounds->contains($round)) {
+            $this->rounds[] = $round;
+            $round->setGame($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRound(Round $round): self
+    {
+        if ($this->rounds->removeElement($round)) {
+            // set the owning side to null (unless already changed)
+            if ($round->getGame() === $this) {
+                $round->setGame(null);
             }
         }
 
