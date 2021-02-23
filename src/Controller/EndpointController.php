@@ -22,9 +22,13 @@
 namespace App\Controller;
 
 use App\Engine\SlotsEngine;
+use App\Entity\GameSession;
 use App\Entity\Round;
+use App\NetworkHelper\Cashier\CashierHelper;
 use App\Repository\GameRepository;
+use App\Repository\GameSessionRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,20 +51,28 @@ class EndpointController extends AbstractController
      * @param DiceEngine $engine
      * @return JsonResponse
      */
-    public function play(Request $request, GameRepository $gameRepository, SlotsEngine $engine, EntityManagerInterface  $entityManager): JsonResponse
-    {
+    public function play(
+        Request $request,
+        GameSessionRepository $sessionRepository,
+        GameRepository $gameRepository,
+        SlotsEngine $engine,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
         $gameObject = $gameRepository->find($request->get('id', -1));
 
         if (!$gameObject) {
             // @todo response error
         }
 
+        $data = json_decode($request->getContent(), true);
         $gameRound = $engine->play($gameObject, json_decode($request->getContent(), true));
 
-         $this->checkWinnings($gameRound);
+        $session = $sessionRepository->findOneBy(['token' => $data['sessionId']]);
+        $gameRound->setSession($session);
+        $this->checkWinnings($gameRound);
 
-         $entityManager->persist($gameRound);
-         $entityManager->flush();
+        $entityManager->persist($gameRound);
+        $entityManager->flush();
 
         return $this->json(
             [
@@ -76,6 +88,10 @@ class EndpointController extends AbstractController
 
         $matrix = $round->getResult()->getMatrix();
 
+        $round->getSession()->setValue(
+            $round->getSession()->getValue() - 10
+        );
+
         foreach ($round->getGame()->getCombinations() as $combination) {
 
             $validSymbols = 0;
@@ -90,9 +106,72 @@ class EndpointController extends AbstractController
             if ($validSymbols == count($combination->getFields())) {
                 $round->setStatus(2);
                 $round->getResult()->addWonCombination($combination);
+                $round->getSession()->setValue(
+                    $round->getSession()->getValue() + 100
+                );
             }
         }
 
         return $round;
     }
+
+    /**
+     * @Route("/session", name="base_endpoint_session")
+     */
+    public function createSession(
+        Request $request,
+        GameRepository $gameRepository,
+        EntityManagerInterface $entityManager,
+        LoggerInterface $logger
+    ) {
+        $data = json_decode($request->getContent(), true);
+        // Check that cashier is ok
+        $cashier = new CashierHelper();
+        $response = $cashier->payIn(
+            [
+                'amount' => $data['amount'],
+                'userId' => $data['userId'],
+                'gameId' => $data['gameId'],
+            ]
+        )->getBody();
+
+        if ($response['status'] !== 0) {
+            return $this->json(
+                [
+                    'status' => $response['status'],
+                ]
+            );
+        }
+
+        $gameObject = $gameRepository->find($request->get('id', -1));
+
+        if (!isset($data['sessionId'])) {
+            $session = new GameSession();
+            $session->setValue($data['amount'])
+                ->setToken(uniqid())
+                ->setGame($gameObject)
+                ->setCreatedAt(new \DateTime());
+        } else {
+            $session = $entityManager->getRepository(GameSession::class)->findOneBy(
+                [
+                    'token' => $data['sessionId'],
+                ]
+            );
+
+            $session->setValue($session->getValue() + $data['amount']);
+        }
+
+        $entityManager->persist($session);
+        $entityManager->flush();
+
+        return $this->json(
+            [
+                'status' => 0,
+                'sessionId' => $session->getToken(),
+                'amount' => $session->getValue(),
+                'wallet' => $response['wallet'],
+            ]
+        );
+    }
+
 }
