@@ -127,8 +127,11 @@ class EndpointController extends AbstractController
         $data = json_decode($request->getContent(), true);
         // Check that cashier is ok
         $cashier = new CashierHelper();
+        //var_dump($data);
         $response = $cashier->payIn(
             [
+                'type' => 1,
+                'suid' => $data['suid'],
                 'amount' => $data['amount'],
                 'userId' => $data['userId'],
                 'gameId' => $data['gameId'],
