@@ -177,4 +177,66 @@ class EndpointController extends AbstractController
         );
     }
 
+    /**
+     * @Route("/remove-session", name="base_endpoint_session")
+     */
+    public function removeSession(
+        Request $request,
+        GameRepository $gameRepository,
+        EntityManagerInterface $entityManager,
+        LoggerInterface $logger
+    ) {
+        $data = json_decode($request->getContent(), true);
+        // Check that cashier is ok
+        $cashier = new CashierHelper();
+        //var_dump($data);
+        $response = $cashier->payIn(
+            [
+                'type' => 1,
+                'suid' => $data['suid'],
+                'amount' => $data['amount'],
+                'userId' => $data['userId'],
+                'gameId' => $data['gameId'],
+            ]
+        )->getBody();
+
+        if ($response['status'] !== 0) {
+            return $this->json(
+                [
+                    'status' => $response['status'],
+                ]
+            );
+        }
+
+        $gameObject = $gameRepository->find($request->get('id', -1));
+
+        if (!isset($data['sessionId'])) {
+            $session = new GameSession();
+            $session->setValue($data['amount'])
+                ->setToken(uniqid())
+                ->setGame($gameObject)
+                ->setCreatedAt(new \DateTime());
+        } else {
+            $session = $entityManager->getRepository(GameSession::class)->findOneBy(
+                [
+                    'token' => $data['sessionId'],
+                ]
+            );
+
+            $session->setValue($session->getValue() + $data['amount']);
+        }
+
+        $entityManager->persist($session);
+        $entityManager->flush();
+
+        return $this->json(
+            [
+                'status' => 0,
+                'sessionId' => $session->getToken(),
+                'amount' => $session->getValue(),
+                'wallet' => $response['wallet'],
+            ]
+        );
+    }
+
 }
