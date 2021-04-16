@@ -32,6 +32,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -68,18 +69,18 @@ class SessionController extends AbstractController
 
     /**
      * SessionController constructor.
-     * @param Request $request
+     * @param RequestStack $requestStack
      * @param LoggerInterface $logger
      * @param EntityManagerInterface $entityManager
      * @param GameSessionRepository $sessionRepository
      */
     public function __construct(
-        Request $request,
+        RequestStack $requestStack,
         LoggerInterface $logger,
         EntityManagerInterface $entityManager,
         GameSessionRepository $sessionRepository
     ) {
-        $this->request = $request;
+        $this->request = $requestStack->getCurrentRequest();
         $this->logger = $logger;
         $this->entityManager = $entityManager;
         $this->sessionRepository = $sessionRepository;
