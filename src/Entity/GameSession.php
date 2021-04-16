@@ -6,6 +6,7 @@ use App\Repository\GameSessionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\IdGenerator\UuidV4Generator;
 
 /**
  * @ORM\Entity(repositoryClass=GameSessionRepository::class)
@@ -14,8 +15,9 @@ class GameSession
 {
     /**
      * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="uuid", unique=true)
+     * @ORM\GeneratedValue(strategy="CUSTOM")
+     * @ORM\CustomIdGenerator(class=UuidV4Generator::class)
      */
     private $id;
 
@@ -48,6 +50,11 @@ class GameSession
      * @ORM\OneToMany(targetEntity=Round::class, mappedBy="session")
      */
     private $rounds;
+
+    /**
+     * @ORM\Column(type="uuid", nullable=true)
+     */
+    private $suid;
 
     public function __construct()
     {
@@ -145,6 +152,24 @@ class GameSession
                 $round->setSession(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSuid()
+    {
+        return $this->suid;
+    }
+
+    /**
+     * @param mixed $suid
+     */
+    public function setSuid($suid)
+    {
+        $this->suid = $suid;
 
         return $this;
     }

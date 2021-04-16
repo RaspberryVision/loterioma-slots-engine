@@ -21,10 +21,7 @@
 
 namespace App\Controller;
 
-use App\Engine\SlotsEngine;
 use App\Entity\GameSession;
-use App\Entity\Round;
-use App\NetworkHelper\Cashier\CashierHelper;
 use App\Repository\GameRepository;
 use App\Repository\GameSessionRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -101,10 +98,10 @@ class SessionController extends AbstractController
         $session->setValue($data['amount'])
             ->setToken(uniqid())
             ->setGame($gameObject)
+            ->setSuid($data['suid'])
             ->setCreatedAt(new \DateTime());
 
-        $this->entityManager->persist($session);
-        $this->entityManager->flush();
+        $this->save($session);
 
         return $this->json(
             [
@@ -122,9 +119,14 @@ class SessionController extends AbstractController
     {
         $data = json_decode($this->request->getContent(), true);
 
-        $session = $this->entityManager->getRepository(GameSession::class)->findOneBy(
+        $session = $this->sessionRepository->find($data['sessionId']);
+
+        $this->save($session);
+
+        return $this->json(
             [
-                'token' => $data['sessionId'],
+                'id' => $session->getId(),
+                'amount' => $session->getValue(),
             ]
         );
     }
@@ -135,14 +137,22 @@ class SessionController extends AbstractController
     public function update()
     {
         $data = json_decode($this->request->getContent(), true);
+        $session = $this->sessionRepository->find($data['sessionId']);
 
-        $session = $this->entityManager->getRepository(GameSession::class)->findOneBy(
+        if ($data['action'] === 1) {
+            $session->setValue($session->getValue() + $data['amount']);
+        } elseif ($data['acton'] === 2) {
+            $session->setValue($session->getValue() - $data['amount']);
+        }
+
+        $this->save($session);
+
+        return $this->json(
             [
-                'token' => $data['sessionId'],
+                'id' => $session->getId(),
+                'amount' => $session->getValue(),
             ]
         );
-
-        $session->setValue($session->getValue() + $data['amount']);
     }
 
     /**
@@ -152,13 +162,28 @@ class SessionController extends AbstractController
     {
         $data = json_decode($this->request->getContent(), true);
 
-        $session = $this->entityManager->getRepository(GameSession::class)->findOneBy(
+        $session = $this->sessionRepository->find($data['sessionId']);
+
+        $session->setExpiredAt(new \DateTime())
+            ->setValue(0);
+
+        $this->save($session);
+
+        return $this->json(
             [
-                'token' => $data['sessionId'],
+                'id' => $session->getId(),
+                'amount' => $session->getValue(),
             ]
         );
+    }
 
-        $session->setValue($session->getValue() + $data['amount']);
+    /**
+     * @param GameSession $session
+     */
+    private function save(GameSession $session)
+    {
+        $this->entityManager->persist($session);
+        $this->entityManager->flush();
     }
 
 }
