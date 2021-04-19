@@ -118,10 +118,7 @@ class SessionController extends AbstractController
     public function read()
     {
         $data = json_decode($this->request->getContent(), true);
-
         $session = $this->sessionRepository->find($data['sessionId']);
-
-        $this->save($session);
 
         return $this->json(
             [
@@ -141,7 +138,18 @@ class SessionController extends AbstractController
 
         if ($data['action'] === 1) {
             $session->setValue($session->getValue() + $data['amount']);
-        } elseif ($data['acton'] === 2) {
+        } elseif ($data['action'] === 2) {
+
+            if ($data['amount'] > $session->getValue()) {
+                return $this->json(
+                    [
+                        'status' => 1,
+                        'id' => $session->getId(),
+                        'amount' => $session->getValue(),
+                    ]
+                );
+            }
+
             $session->setValue($session->getValue() - $data['amount']);
         }
 
@@ -149,6 +157,7 @@ class SessionController extends AbstractController
 
         return $this->json(
             [
+                'status' => 0,
                 'id' => $session->getId(),
                 'amount' => $session->getValue(),
             ]
