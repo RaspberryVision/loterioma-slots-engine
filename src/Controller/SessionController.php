@@ -106,7 +106,7 @@ class SessionController extends AbstractController
         return $this->json(
             [
                 'status' => 0,
-                'sessionId' => $session->getToken(),
+                'sessionId' => $session->getId(),
                 'amount' => $session->getValue(),
             ]
         );
